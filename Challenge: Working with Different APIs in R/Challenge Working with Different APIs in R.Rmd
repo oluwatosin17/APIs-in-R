@@ -1,0 +1,345 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+
+
+
+https://github.com/15Dkatz/official_joke_api
+
+
+Instructions
+
+Search the API documentation to determine the endpoint for a random programming joke.
+
+Query the API to request a random programming joke and get the status code of your request.
+
+Extract the content from the API response and display it to see the joke.
+
+For accuracy from our answer-checker, save the status code as status.
+
+
+```{r}
+library(httr)
+joke_api_json <- function(endpoint, queries = list()) {
+
+  # Preparing the URL 
+  url <- modify_url("https://official-joke-api.appspot.com", path = endpoint) # CHANGE: the base URL changed
+
+  # API requests
+  response <- GET(url, query = queries)
+  status <- (status_code(response))
+  print(status)
+
+  # Extracting content
+  json_text <- content(response)
+  json_text
+
+}
+
+joke_api_json("/jokes/programming/random")
+```
+
+
+
+```{r}
+library(httr)
+response <- GET("https://official-joke-api.appspot.com/jokes/programming/random")
+response
+
+status <- status_code(response)
+status
+
+the_joke <- content(response)
+the_joke
+```
+
+
+```{r}
+library(httr)
+response <- GET("https://official-joke-api.appspot.com/jokes/programming/random")
+response
+
+status <- status_code(response)
+status
+
+the_joke <- content(response)
+the_joke
+```
+
+
+Instructions
+
+Search the API documentation to determine the URL for a specific job standard title (we have the uuid of the job we want to extract).
+
+Edit this URL for the ID equal to 8fd068c8d9be73abfa678856177b6c40.
+Use this URL to query the API to request the selected job description and get your request's status code.
+
+Extract the content from the API response and display it to see this position.
+
+For accuracy from our answer-checker, save the status code as status and the job content as the_job.
+
+
+
+```{r}
+
+response <- GET("http://api.dataatwork.org/v1/jobs/8fd068c8d9be73abfa678856177b6c40")
+
+status <- status_code(response)
+status
+
+the_job<- content(response)
+the_job
+
+
+```
+
+Brief API description: Meetup API — finding and interacting with meetup platforms.
+
+Our goal: we want to extract the data analytics meetups and convert the output into a dataframe. The output dataframe only contains id, name, and description columns.
+
+Here is the wb_api_json_get_df() function as a reminder. Feel free to modify it for your purposes. Mainly, you should specify the correct URL and adjust how you get the dataframe. Thanks to the optional parameter queries, you can specify parameters that you will find in the documentation for this function. If you're stuck, feel free to print out each step inside the function to see where the problem comes from.
+
+topics?query=data_analytics&only=id,name,description
+
+```{r}
+wb_api_json_get_df <- function(endpoint, queries = list()) {
+
+  # Preparing the URL 
+  url <- modify_url("https://api.meetup.com", path = endpoint)
+
+  # API requests
+  response <- GET(url, query = queries)
+
+  # Tracking errors
+  if ( http_error(response) ){
+    print(status_code(response))
+    stop("Something went wrong.", call. = FALSE)
+  }
+
+  if (http_type(response) != "application/json") {
+    stop("API did not return json", call. = FALSE)
+  }
+
+  # Extracting content
+  json_text <- content(response, "text")
+
+  # Converting content into Dataframe
+  dataframe <- jsonlite::fromJSON(json_text)
+
+  # Return the dataframe  
+  dataframe
+}
+
+data_analytics_meetups <- wb_api_json_get_df("find/topics", list(query = "data analytics",
+                                                                     only = "id,name,description"))
+data_analytics_meetups
+
+data_analytics_meetups <- wb_api_json_get_df("/find/topics?query=data analytics&only=id,name,description")
+
+```
+
+```{r}
+afrwb_api_json_get_df <- wb_api_json_get_df("/v2/country/afr/indicator/NV.AGR.PCAP.KD.ZG", list(format = "json", 
+                                                                                 date="1989:2000"))
+
+```
+
+```{r}
+wb_api_json_get_df <- function(endpoint, queries = list()) {
+
+  # Preparing the URL 
+  url <- modify_url("http://api.worldbank.org", path = endpoint)
+
+  # API requests
+  response <- GET(url, query = queries)
+
+  # Tracking errors
+  if ( http_error(response) ){
+    print(status_code(response))
+    stop("Something went wrong.", call. = FALSE)
+  }
+
+  if (http_type(response) != "application/json") {
+    stop("API did not return json", call. = FALSE)
+  }
+
+  # Extracting content
+  json_text <- content(response, "text")
+
+  # Converting content into Dataframe
+  dataframe <- jsonlite::fromJSON(json_text)
+
+  # Return the dataframe  
+  dataframe[[2]]
+}
+```
+
+
+```{r}
+library(ggplot2)
+```
+
+```{r}
+ggplot(data = afrwb_api_json_get_df, aes(x = date, y = value, group = 1))+geom_line()+ylab("Real agricultural GDP per capita growth rate (%)")
+
+
+```
+Instructions
+
+Check the API documentation.
+
+Look at the sorting and pagination sections.
+Be aware that even if the pagination documentation states the API outputs 30 items per page, it actually only outputs 20 items.
+Query the API to request the oldest (top 20) discovered plants.
+
+Don't forget to specify your API key.
+Convert the API response's content into a dataframe.
+Use the str() function to see the structure of the dataframe.
+
+For accuracy from our answer-checker, save the dataframe as top_20_plants_df.
+
+
+
+```{r}
+library(httr)
+wb_api_json_get_df <- function(endpoint, queries = list()) {
+
+  # Preparing the URL 
+  url <- modify_url("https://trefle.io/", path = endpoint)
+
+  # API requests
+  response <- GET(url, query = queries)
+
+  # Tracking errors
+  if ( http_error(response) ){
+    print(status_code(response))
+    stop("Something went wrong.", call. = FALSE)
+  }
+
+  if (http_type(response) != "application/json") {
+    stop("API did not return json", call. = FALSE)
+  }
+
+  # Extracting content
+  json_text <- content(response, "text")
+
+  # Converting content into Dataframe
+  dataframe <- jsonlite::fromJSON(json_text)
+
+  # Return the dataframe  
+  dataframe$data$common_name
+}
+
+top_20_plants_df <- wb_api_json_get_df("api/v1/plants?order[year]=asc", list(format = "json",token = "6UUL3Lj61HIijT4hqfJsM2mgeTXuALqU4JImEtgScUY"))
+
+
+top_20_plants_df
+
+```
+
+Instructions
+
+Search the API documentation for how to build expected endpoints with the following information.
+
+We want to collect Nigeria (NGA) temperature data for the period 2020 to 2039.
+The type of data is manom, i.e., average monthly change (anomaly).
+The scenario is a2.
+The model is bccr_bcm2_0 or cccma_cgcm3_1.
+Query the API to request the Nigerian climate data for the following models:
+
+The model bccr_bcm2_0.
+The model cccma_cgcm3_1.
+For accuracy from our answer-checker, save the bccr_bcm2_0 and cccma_cgcm3_1 models' dataframes respectively as climate_nigeria_2039_1 and climate_nigeria_2039_2.
+Use the str() function to see the structure of the dataframes.
+
+Looking at the dataframe's structure, we can see that the average monthly change values are in the monthVals variable. However, this variable is a list of one element. So we have to find a way to extract just the values from this list.
+Bulid a dataframe from the model dataframes. The final dataframe should look like this.
+
+The dataframe contains three columns and 24 rows. The first 12 rows for the 12 months of the bccr_bcm2_0 model. The last 12 rows for the cccma_cgcm3_1 model.
+
+The gcm column contains the model names: bccr_bcm2_0 and cccma_cgcm3_1.
+The month column contains the month names' abbreviation: 'Jan' 'Feb' 'Mar' 'Apr' 'May' 'Jun' 'Jul' 'Aug' 'Sep' 'Oct' 'Nov' 'Dec'.
+The value column contains the average monthly change data for each model.
+gcm	month	value
+1	bccr_bcm2_0	Jan	0.76
+2	bccr_bcm2_0	Feb	1.04
+3	bccr_bcm2_0	Mar	0.97
+Use the ggplot() function to create line plots to compare the two models.
+
+Here, find the code snippet to plot the combined dataframe:
+library(ggplot2)
+ggplot(data = df,
+      aes(x = factor(month, levels = month.abb), 
+          y = value, 
+          group = gcm, 
+          color = gcm)) + 
+    geom_line() + 
+    ylab("Average monthly change of Temperature (anomaly)") + 
+    xlab("Month")
+    
+    
+    
+```{r}
+wb_api_json_get_df <- function(endpoint, queries = list()) {
+
+  # Preparing the URL 
+  url <- modify_url("http://climatedataapi.worldbank.org", path = endpoint)
+
+  # API requests
+  response <- GET(url, query = queries)
+
+  # Tracking errors
+  if ( http_error(response) ){
+    print(status_code(response))
+    stop("Something went wrong.", call. = FALSE)
+  }
+
+  if (http_type(response) != "application/json") {
+    stop("API did not return json", call. = FALSE)
+  }
+
+  # Extracting content
+  json_text <- content(response, "text")
+
+  # Converting content into Dataframe
+  dataframe <- jsonlite::fromJSON(json_text)
+
+  # Return the dataframe  
+  dataframe
+}
+
+climate_nigeria_2039_1 <- wb_api_json_get_df("/climateweb/rest/v1/country/manom/bccr_bcm2_0/a2/tas/2020/2039/NGA")
+climate_nigeria_2039_2 <- wb_api_json_get_df("/climateweb/rest/v1/country/manom/cccma_cgcm3_1/tas/2020/2039/NGA")
+
+climate_nigeria_2039_1
+str(climate_nigeria_2039_1)
+
+?month.abb
+gcm <- c(rep("bccr_bcm2_0", 12), rep("cccma_cgcm3_1", 12))
+gcm
+month <- rep(month.abb, 2)
+month
+value <- c(climate_nigeria_2039_1$monthVals[[1]], 
+           climate_nigeria_2039_2$monthVals[[1]])
+value
+
+df <- tibble::tibble("gcm" = gcm, "month" = month, "value" = value)
+
+df
+
+library(ggplot2)
+ggplot(data = df,
+      aes(x = factor(month, levels = month.abb), 
+          y = value, 
+          group = gcm, 
+          color = gcm)) + 
+    geom_line() + 
+    ylab("Average monthly change of Temperature (anomaly)") + 
+    xlab("Month")
+
+```
+    
+    
