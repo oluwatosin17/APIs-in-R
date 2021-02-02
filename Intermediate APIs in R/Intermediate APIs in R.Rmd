@@ -1,0 +1,212 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+```{r}
+wb_api_json_get_df <- function(endpoint) {
+
+  # Preparing the URL 
+  url <- modify_url("http://api.worldbank.org", path = endpoint)
+
+  # API requests
+  response <- GET(url)
+
+  # Tracking errors
+  if ( http_error(response) ){
+    print(status_code(response))
+    stop("Something went wrong.", call. = FALSE)
+  }
+
+  if (http_type(response) != "application/json") {
+    stop("API did not return json", call. = FALSE)
+  }
+
+  # Extracting content
+  json_text <- content(response, "text")
+
+  # Converting content into Dataframe
+  dataframe <- jsonlite::fromJSON(json_text)
+
+  # Return the dataframe  
+  dataframe[[2]]
+}
+```
+
+In this mission, we'll continue working with this API. We will also discover the GitHub API, specifically how to query it with authentication. Our goal is to develop a greater understanding of APIs.
+
+As a reminder, let's use the wb_api_json_get_df() function to query the indicator time series available in the World Bank datasets.
+
+
+Instructions
+
+Use this command to query the indicators covered by the World Bank APIs: wb_api_json_get_df("v2/indicator?format=json").
+
+Copy-paste this command in the "Editor".
+Assign its result to the variable wb_indicator_df.
+Click the "Submit Answer" button to check if the answer is correct.
+Explore the wb_indicator_df dataframe to see the regions the World Bank APIs cover.
+
+```{r}
+wb_indicator_df <- wb_api_json_get_df("v2/indicator?format=json")
+```
+
+Instructions
+
+We've provided the previous wb_api_json_get_df() function in the Editor as a reminder.
+
+Edit the previous wb_api_json_get_df() function.
+
+Add a new parameter named queries to the function and assign list() to it to make it an optional parameter: queries = list(). We assign a list() here so that multiple optional parameters can be passed to our function.
+Edit the GET() function to set its query parameter to our function parameter queries.
+Use the wb_api_json_get_df() function to output the World Bank API response for the indicator endpoint in dataframe "v2/indicator" with the query parameter format="json".
+
+Save the output as wb_indicator_df_with_param
+```{r}
+response <- httr::GET("http://api.worldbank.org/v2/indicator", query = list(format="json"))
+json_df <- jsonlite::fromJSON(httr::content(response, "text"))[[2]]
+str(json_df)
+```
+
+
+```{r}
+wb_api_json_get_df <- function(endpoint,queries = list()) { # TODO 1: Modify to add the optional parameter queries
+  
+  # Preparing the URL 
+  url <- modify_url("http://api.worldbank.org", path = endpoint)
+  
+  # API requests
+  response <- GET(url,queries = list()) # TODO 2: Modify to set the query parameter to queries
+
+  # Tracking errors
+  if ( http_error(response) ){
+    print(status_code(response))
+    stop("Something went wrong.", call. = FALSE)
+  }
+    
+  if (http_type(response) != "application/json") {
+    stop("API did not return json", call. = FALSE)
+  }
+  
+  # Extracting content
+  json_text <- content(response, "text")
+
+  # Converting content into Dataframe
+  dataframe <- jsonlite::fromJSON(json_text)
+    
+  # Return the dataframe  
+  dataframe[[2]]
+}
+
+# Type the answer to the second instruction below
+wb_indicator_df_with_param <- wb_api_json_get_df("v2/indicator?format=json")
+
+```
+Instructions
+
+We've loaded wb_api_json_get_df() function.
+
+Use the wb_api_json_get_df() function to output the World Bank API response for the indicator endpoint in dataframe "v2/indicator". You don't need to modify the function for this operation because you can pass these optional query parameters directly to the queries list object we added in the previous screen. Set the following query parameters:
+
+Set the output to JSON format: format="json".
+Extract the third page.
+Set the number of indicators per page to 75.
+Save the output as wb_indicator_json_df_3.
+
+
+```{r}
+
+response <- httr::GET("http://api.worldbank.org/v2/indicator", 
+                      query = list(format = "json", page=2, per_page = 100))
+json_df <- jsonlite::fromJSON(httr::content(response, "text"))[[2]]
+str(json_df)
+
+
+```
+
+```{r}
+wb_indicator_json_df_3 <- wb_api_json_get_df("v2/indicator?format=json",list(format = "json", page=3, per_page = 75))
+
+
+```
+
+```{r}
+library(httr)
+gov_api_json <- function(endpoint, queries = list()) {
+
+  # Preparing the URL 
+  url <- modify_url("https://api.ers.usda.gov", path = endpoint) # CHANGE: the base URL changed
+
+  # API requests
+  response <- GET(url, query = queries)
+
+  # Tracking errors
+  if ( http_error(response) ){
+    print(status_code(response))
+    stop("Something went wrong.", call. = FALSE)
+  }
+
+  if (http_type(response) != "application/json") {
+    stop("API did not return json", call. = FALSE)
+  }
+
+  # Extracting content
+  json_text <- content(response, "text")
+
+  # Return the dataframe
+  jsonlite::fromJSON(json_text)$data # CHANGE $
+}
+```
+
+Instructions
+
+Use this link to generate an API key for Data Gov API.
+
+We recommend that you generate a key for yourself:
+It will give you experience with how to do it.
+We will also use it in the screens and the following mission. You can also use it for your personal projects.
+If you prefer not to, you may simulate doing this by entering api_key = your_key for the next few exercises.
+Use the gov_api_json() function to output the Data Gov API response for the agriculture dataset categories in dataframe: "data/arms/category".
+
+Set the api_key query parameter to your API key.
+Save the output as agriculture_categories.
+
+
+```{r}
+
+gov_api_json("data/arms/category",queries = list(api_key = "0odcm1CVeOPbYmGU4wFQTblSm0yFgorVJsAULpKj"))
+
+```
+
+```{r}
+POST("http://httpbin.org/post", body = list(comment = "Hello world", name = "authordq"))
+
+```
+We've loaded the httr library for you.
+
+Send information to the http://httpbin.org/post with the POST() function.
+
+Send the following message: message = "this is a test".
+Send your name: name = "write your name here".
+Store the API response as httpbin_response
+Use the http_error() function to make sure that there was no error.
+
+Store the output of the function as check_error
+Display httpbin_response using the print() function.
+
+
+
+```{r}
+library("httr")
+
+httpbin_response <- POST("http://httpbin.org/post", body = list(comment = "this is a test", name = "Oluwatosin"))
+
+check_error <- http_error(httpbin_response)
+print(httpbin_response)
+```
+
+
+```{r}
+```
+
