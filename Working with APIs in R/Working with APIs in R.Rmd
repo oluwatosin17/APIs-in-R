@@ -1,0 +1,310 @@
+---
+title: "Working with APIs"
+output: html_notebook
+---
+
+
+Instructions
+
+Use this command to query the topics covered by the World Bank APIs: wb_api_json_get_df("v2/topic?format=json").
+
+Copy-paste this command in the "Editor."
+Assign its result to the variable wb_topic.
+Click the "Submit Answer" button to see if the answer is correct.
+Explore the wb_topic dataframe to see the topics covered by the World Bank APIs.
+
+
+```{r}
+install.packages("rjson")
+library("rjson")
+wb_topic <- wb_api_json_get_df("v2/topic?format=json")
+
+```
+
+Before making API requests, we have to understand the API documentation. In this mission, we've already done this part of the work for the World Bank APIs. Now, we'll show you how to use it.
+
+Organizations host their APIs on web servers. When we type www.google.com in our browser's address bar, our computer is actually asking the www.google.com server for a web page. This request is called a Hypertext Transfer Protocol (HTTP) request. The server returns a page to us as a response.
+
+API requesting web page or content
+APIs work much the same way, except instead of our web browser asking for a web page, a program, called the client, asks the server for data. The server returns a response to the client. The response contains status information about the request, and it may also include the requested content. A typical format for this content is JavaScript Object Notation (JSON). We'll leverage the knowledge we gained in Map and Anonymous Functions mission to manipulate and transform JSON objects into dataframes.
+
+The Uniform Resource Locator or URL is a string (of characters) that uniquely identifies a web resource. For example, www.google.com is the URL that identifies Google pages. The URL is the input of any API request. It consists of two parts: - The fixed part: base URL. The base URL is the main address of the API web server. - The variable part: endpoint. An endpoint is a server route for retrieving specific data from an API.
+
+For example, you locate the API for topics covered by the World Bank with the following URL.
+
+API URL
+Basically, we follow four steps for API requests.
+
+API process details
+Most of the functions we need to complete these steps are in the httr package. We use the following code snippet for its installation.
+
+install.packages("httr")
+To load this library, we use library(httr).
+
+One of the first functions that we will see from this library is modify_url(), which allows us to combine base URLs and endpoints appropriately.
+
+url <- modify_url("http://api.worldbank.org", path = "v2/topic")
+# url contains: 'http://api.worldbank.org/v2/topic'
+On the previous screen, we queried the topics covered by WB datasets. On this screen, let's start building our wb_api_json_get_df() function by preparing the url to identify the countries covered by these topics.
+
+
+Instructions
+
+We've already loaded the httr package.
+
+Create a function named wb_api_json_get_df().
+
+Add a parameter named endpoint to this function.
+Inside this function, use the modify_url() function to combine the base URL "http://api.worldbank.org" and the endpoint in the parameter endpoint.
+Return the modified URL.
+We name the modified URL as url, but feel free to name it differently.
+Use the wb_api_json_get_df() function to output the proper link for the World Bank country endpoint: "v2/country".
+
+Save the output as wb_country_url.
+
+```{r}
+install.packages("httr")
+library("httr")
+
+```
+```{r}
+wb_api_json_get_df <- function(endpoint){
+  url <- modify_url("http://api.worldbank.org", path = endpoint)
+  return(url)
+}
+
+ wb_country_url <- wb_api_json_get_df("v2/country") 
+ wb_country_url
+ 
+```
+
+Instructions
+
+We've provided the previous wb_api_json_get_df() function in the Editor as a reminder.
+
+Edit the previous wb_api_json_get_df() function.
+
+Use the GET() function to query the API with the modified URL.
+Return the API response.
+We name the API response as response, but feel free to name it differently.
+Use the wb_api_json_get_df() function to output the World Bank API response for the indicator endpoint in JSON format: "v2/indicator?format=json".
+
+Save the output as wb_indicator_response.
+
+```{r}
+# Edit this function with respect to the first instruction
+wb_api_json_get_df <- function(endpoint) {
+  
+  # Preparing the URL 
+  url <- modify_url("http://api.worldbank.org", path = endpoint)
+  
+  # TODO 1: add code to query the API
+  return(GET(url))
+
+  # TODO 2: modify to return the API response
+ response <- (GET(url))
+}
+
+# Type the answer to the second instruction below
+wb_indicator_response <- wb_api_json_get_df("v2/indicator?format=json")
+wb_indicator_response
+
+```
+Instructions
+
+We've provided the previous wb_api_json_get_df() function in the editor as a reminder.
+
+Use an if statement and the http_error() function to check if an error happens.
+
+If an error happens, print the status code using the status_code() function.
+Then use this command to stop the function execution: stop("Something went wrong.", call. = FALSE).
+These if instructions must be before the return instruction in the function.
+Use an if statement to check if the format of the content is not JSON.
+
+Check if http_type(response) is different to "application/json"
+If so, use this command to stop the function execution: stop("API did not return json", call. = FALSE).
+These if instructions must be after the previous one and before the return instruction in the function.
+
+
+```{r}
+library("dplyr")
+# Edit this function with respect to the first instruction
+wb_api_json_get_df <- function(endpoint) {
+  
+  # Preparing the URL 
+  url <- modify_url("http://api.worldbank.org", path = endpoint)
+  
+  # API requests
+  response <- GET(url)
+    
+  # TODO: Add code to track errors here
+  if (http_error(response)) {
+    print(status_code(response))
+    stop("Something went wrong.", call. = FALSE)
+    
+  }
+  if(http_type(response) != "application/json"){stop("API did not return json", call. = FALSE)}
+
+  # Returning the API Response
+  response
+}
+
+# Type the answer to the second instruction below
+
+wb_indicator_response <- wb_api_json_get_df("v2/indicator?format=json")
+wb_indicator_response
+```
+
+Instruction
+
+We've provided the previous wb_api_json_get_df() function in the Editor as a reminder.
+
+Edit the previous wb_api_json_get_df() function.
+
+Use the content() function to extract the content from the API response as plain text.
+Return this content.
+We name this content as json_text, but feel free to name it differently.
+Use the wb_api_json_get_df() function to output the World Bank API response for the indicator endpoint in JSON format: "v2/indicator?format=json".
+
+Save the output as wb_indicator_json_text.
+
+```{r}
+    # Edit this function with respect to the first instruction
+wb_api_json_get_df <- function(endpoint) {
+  
+  # Preparing the URL 
+  url <- modify_url("http://api.worldbank.org", path = endpoint)
+  
+  # API requests
+  response <- GET(url)
+  
+  # Tracking errors
+  if ( http_error(response) ){
+    print(status_code(response))
+    stop("Something went wrong.", call. = FALSE)
+  }
+    
+  if (http_type(response) != "application/json") {
+    stop("API did not return json", call. = FALSE)
+  }
+    
+  # TODO 1: add code to extract content here
+  response <- content(response, as = "text")
+    
+  # TODO 2: modify to return the extracted content
+  response 
+}
+
+# Type the answer to the second instruction below
+
+wb_indicator_json_text <- wb_api_json_get_df("v2/indicator?format=json")
+```
+
+
+Instructions
+
+We've provided the previous wb_api_json_get_df() function in the Editor as a reminder.
+
+Edit the previous wb_api_json_get_df() function.
+
+Use the jsonlite::fromJSON() function to convert the extracted content into a dataframe.
+Return this output.
+We name this output as dataframe, but feel free to name it differently.
+Use the wb_api_json_get_df() function to output the World Bank API response for the indicator endpoint in dataframe: "v2/indicator?format=json".
+
+Save the output as wb_indicator_json_df.
+
+
+```{r}
+
+    wb_api_json_get_df <- function(endpoint) {
+
+      # Preparing the URL 
+      url <- modify_url("http://api.worldbank.org", path = endpoint)
+
+      # API requests
+      response <- GET(url)
+
+      # Tracking errors
+      if ( http_error(response) ){
+        print(status_code(response))
+        stop("Something went wrong.", call. = FALSE)
+      }
+
+      if (http_type(response) != "application/json") {
+        stop("API did not return json", call. = FALSE)
+      }
+
+      # Extracting content
+      json_text <- content(response, "text")
+
+      # TODO 1: add code to convert the extracted content into a dataframe
+ json_text <- jsonlite::fromJSON(json_text)
+      # TODO 2: modify to return the dataframe 
+      json_text
+    }
+
+    # Type the answer to the second instruction below
+wb_indicator_json_df <- wb_api_json_get_df( "v2/indicator?format=json") 
+
+```
+
+
+```{r}
+str(wb_indicator_json_df)
+```
+
+Instructions
+
+We've provided the previous wb_api_json_get_df() function in the Editor as a reminder.
+
+Edit the previous wb_api_json_get_df() function.
+
+Change the return object to access only the second element of the list, which is a dataframe.
+Use the wb_api_json_get_df() function to output the World Bank API response for the indicator endpoint in dataframe: "v2/indicator?format=json".
+
+Save the output as wb_indicator_json_df.
+
+```{r}
+wb_api_json_get_df <- function(endpoint) {
+  
+  # Preparing the URL 
+  url <- modify_url("http://api.worldbank.org", path = endpoint)
+  
+  # API requests
+  response <- GET(url)
+
+  # Tracking errors
+  if ( http_error(response) ){
+    print(status_code(response))
+    stop("Something went wrong.", call. = FALSE)
+  }
+    
+  if (http_type(response) != "application/json") {
+    stop("API did not return json", call. = FALSE)
+  }
+  
+  # Extracting content
+  json_text <- content(response, "text")
+
+  # Converting content into Dataframe
+  dataframe <- jsonlite::fromJSON(json_text)
+    
+  # Return the dataframe  
+  dataframe <- dataframe[[2]]# TODO: Edit this line
+ dataframe 
+}
+
+# Type the answer to the second instruction below
+wb_api_json_get_df( "v2/indicator?format=json") 
+
+```
+```{r}
+wb_api_json_get_df("v2/topic?format=json")
+```
+
+```{r}
+wb_api_json_get_df("v2/region?format=json")
+
+```
+
